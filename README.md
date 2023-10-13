@@ -1,5 +1,5 @@
 # CRust
-This is a repository encompasing the work that went into ECE350 Computer Organization. Computer Org. utilizes a textbook from an online website called [www.nand2tetris.org]((https://www.nand2tetris.org/)). Nand2Tetris is a online course designed by MIT graduate students which is based off of the book The Elements of Computing Systems: Building a Modern Computer from First Principles; written by those same graduate students: Noam Nisan and Shimon Schocken.
+This is a repository encompasing the work that went into ECE350 Computer Organization. Computer Org. utilizes a textbook from an online website called [www.nand2tetris.org](https://www.nand2tetris.org/). Nand2Tetris is a online course designed by MIT graduate students which is based off of the book The Elements of Computing Systems: Building a Modern Computer from First Principles; written by those same graduate students: Noam Nisan and Shimon Schocken.
 
 Computer Org. is a class that is comprised of a term long project involving three major goals
 
