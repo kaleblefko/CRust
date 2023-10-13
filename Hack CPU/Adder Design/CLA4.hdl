@@ -1,0 +1,51 @@
+/**
+ * 4-bit CLA.
+ * Author: Naga Kandasamy
+ * Date created: June 29, 2020
+ * Date modified: September 12, 2021
+ * 
+ * Student name(s): 
+ * Date modified: 
+ */
+
+CHIP CLA4 {
+    IN x[4], y[4], cin;     // 4-bit inputs
+    OUT z[4], cout;         // 4-bit output, 1 carry out bit
+
+    PARTS: 
+    FullAdder(x = x[0], y = y[0], cin = cin, z = z[0], cout = discard0); // Add x0 and y0
+    And(a = x[0], b = y[0], out = g0);
+    Or(a = x[0], b = y[0], out = p0);
+    And(a = p0, b = cin, out = p0andcin);
+    Or(a = g0, b = p0andcin, out = c0); // Generate carry0
+
+    FullAdder(x = x[1], y = y[1], cin = c0, z = z[1], cout = discard1); // Add x1 and y1
+    And(a = x[1], b = y[1], out = g1);
+    Or(a = x[1], b = y[1], out = p1);
+    And(a = p1, b = p0andcin, out = p1andp0andcin);
+    And(a = g0, b = p1, out = g0andp1);
+    Or(a = g1, b = g0andp1, out = g0org0andp1);
+    Or(a = g0org0andp1, b = p1andp0andcin, out = c1); // Generate carry1
+
+    FullAdder(x = x[2], y = y[2], cin = c1, z = z[2], cout = discard2); // Add x2 and y2
+    And(a = x[2], b = y[2], out = g2);
+    Or(a = x[2], b = y[2], out = p2);
+    And(a = g1, b = p2, out = g1andp2);
+    And(a = g0andp1, b = p2, out = g0andp1andp2);
+    And(a = p2, b = p1andp0andcin, out = p2andp1andp0andcin);
+    Or(a = g2, b = g1andp2, out = g2org1andp2);
+    Or(a = g2org1andp2, b = g0andp1andp2, out = temp0);
+    Or(a = temp0, b = p2andp1andp0andcin, out = c2); // Generate carry2
+
+    FullAdder(x = x[3], y = y[3], cin = c2, z = z[3], cout = discard3); // Add x3 and y3
+    And(a = x[3], b = y[3], out = g3);
+    Or(a = x[3], b = y[3], out = p3);
+    And(a = g2, b = p3, out = g2andp3);
+    And(a = g1andp2, b = p3, out = g1andp2andp3);
+    And(a = g0andp1andp2, b = p3, out = g0andp1andp2andp3);
+    And(a = p2andp1andp0andcin, b = p3, out = p3andp2andp1andp0andcin);
+    Or(a = g3, b = g2andp3, out = temp1);
+    Or(a = temp1, b = g1andp2andp3, out = temp2);
+    Or(a = temp2, b = g0andp1andp2andp3, out = temp3);
+    Or(a = temp3, b = p3andp2andp1andp0andcin, out = cout); // Generate cout
+}
