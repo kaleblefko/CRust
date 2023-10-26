@@ -9,12 +9,12 @@ M = D // b <- 0
 @0
 D = A // D <- 0
 @18 // c
-M = D // b <- 0
+M = D // c <- 0
 (LOOP)
 @17 // b
 D = M; // D <- b
 @END
-D; JLE // if B > 0, goto END
+D; JLE // if B <= 0, goto END
 @16 // a
 D = M // D <- a
 @18 // c
