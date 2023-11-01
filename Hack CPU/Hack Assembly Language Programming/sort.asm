@@ -31,7 +31,7 @@ M = 0
         M = D // store pointer
         A = M
         D = M
-        @21 // A[i]
+        @21 // temp to store A[i]
         M = D
         @16 // RAM[16] stores base address of array A
         D = M
@@ -41,7 +41,7 @@ M = 0
         M = D + 1
         A = M
         D = M
-        @22 // A[i+1]
+        @22 // temp to store A[i+1]
         M = D
         @21 // A[i]
         D = M
