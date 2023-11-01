@@ -46,35 +46,48 @@ CHIP CPU {
     // if (instruction[15] == 1) AND instruction[4] == 1
     // instruction[15]: bit specifying A-type or C-type instruction
     // instruction[4]: dest bit d2 which is the load signal for the D register
-
+    And(a=instruction[15], b=instruction[4], out=loadD);
+    DRegister(in=aluOut, load=loadD, out=D);
     // Implement the A register, which is loaded under the following conditions:
     // if (instruction[15] == 0) OR (instruction[15] == 1 AND instruction[5] == 1) 
     // instruction[15]: 0 for A-type and 1 for C-type instruction 
     // instruction[5]: dest bit d1 which is the load signal for the A register
-
+    Not(in=instruction[15], out=aType);
+    Mux16(a=aluOut, b=instruction, sel=aType, out=aInput);
+    Or(a=aType, b=instruction[5], out=loadA);
+    ARegister(in=aInput, load=loadA, out=A, out[0..14]=addressM);
     // Implement the ALU. The control signals are c1, c2, c3, c4, c5, c6, which correspond to instruction[11..6]
-
+    Mux16(a=A, b=inM, sel=instruction[12], out=AM);
+    ALU(x=D, y=AM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluOut, out=outM, zr=zr, ng=ng);
     // Bits j1 j2 j3 specify the various jump commands: null, JGT, JEQ, JGE, JLT, JNE, JLE, JMP 
-    
+    Not(in=zr, out=notzr);
+    Not(in=ng, out=notng);
+    DMux8Way(in=true, sel=instruction[0..2], a=null, b=JGT, c=JEQ, d=JGE, e=JLT, f=JNE, g=JLE, h=JMP);
     // Check for JGT AND > 0 indication from ALU
-    
+    And(a=notng, b=notzr, out=temp0);
+    And(a=temp0, b=JGT, out=jump0);
     // Check for JEQ AND == 0
-    
+    And(a=zr, b=JEQ, out=jump1);
     // Check for JGE AND >= 0
-
+    Or(a=notng, b=zr, out=temp1);
+    And(a=temp1, b=JGE, out=jump2);
     // Check for JLT AND < 0
-
+    And(a=ng, b=notzr, out=temp3);
+    And(a=temp3, b=JLT, out=jump3);
     // Check for JNE AND != 0
-
+    And(a=notzr, b=JNE, out=jump4);
     // Check for JLE AND <= 0
-
+    Or(a=ng, b=zr, out=temp5);
+    And(a=temp5, b=JLE, out=jump5);
     // Check for JMP
-
     // Generate the load signal for PC, if the instruction is C-type and any of the above conditions are true
-
+    Or8Way(in[0]=jump0, in[1]=jump1, in[2]=jump2, in[3]=jump3, in[4]=jump4, in[5]=jump5, in[6]=JMP, in[7]=false, out=tempLoad);
+    And(a=tempLoad, b=instruction[15], out=loadPC);
     // Generate the inc signal for PC
-
+    Not(in=loadPC, out=inc);
+    PC(in=A, load=loadPC, inc=inc, reset=reset, out[0..14]=pc);
     // Set the writeM control line if instruction[15] == 1 AND instruction[3] == 1
     // instruction[15]: 0 if A-type, 1 if C-type instruction 
     // instruction[3]: the d3 bit, specifying the load signal to memory
+    And(a=instruction[15], b=instruction[3], out=writeM);
 }
