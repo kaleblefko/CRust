@@ -20,7 +20,7 @@ The Assembler takes in a .asm file and converts it into a .hack file. .hack file
 4. Assemble binary codes into complete machine instruction
 
 # 3) Compiler
-Finally, a compiler was made for our own low level language which converts the low level language into assembly to be processed into Machine Code for the Hack CPU to use.
+Finally, a compiler was made for our own low level language which converts the low level language into assembly to be processed into Hack Assembly for the Assembler to use.
 
 For the sake of my project, the name of my low level language is CRust, and this repository follows the progress and components that went into creating CRust.
 
