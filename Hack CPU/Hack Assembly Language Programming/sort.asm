@@ -1,19 +1,19 @@
 @18 // RAM[18] stores i
 M = 0 // i = 0
-@19 // continue
+@19 // hold continue
 M = 1
-@20
+@20 // stores pointer
 M = 0
 (OUTERLOOP)
     @19
     D = M
     @EXIT
     D;JEQ
+    @18
+    M = 0
     @20
     M = 0
     @19
-    M = 0
-    @18
     M = 0
     (INNERLOOP)
         @18
@@ -28,6 +28,7 @@ M = 0
         @18
         D = D + M // Absolute address (base + index); our pointer value
         @20
+        M = D // store pointer
         A = M
         D = M
         @21 // A[i]
@@ -37,8 +38,8 @@ M = 0
         @18
         D = D + M // Absolute address (base + index); our pointer value
         @20
+        M = D + 1
         A = M
-        A = A + 1
         D = M
         @22 // A[i+1]
         M = D
@@ -81,7 +82,7 @@ M = 0
             0;JMP
         (DONTSWAP)
         @18
-        M = M + 1 // i = i + 1
+        M = M + 1
         @INNERLOOP
         0;JMP
     @OUTERLOOP
