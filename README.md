@@ -4,7 +4,7 @@ This is a repository encompasing the work that went into ECE350 Computer Organiz
 Computer Org. is a class that is comprised of a term long project involving three major goals
 
 # 1) The Hack Computer
-The Hack CPU is a 16-bit machine comrpised of a single cycle data path. This machine uses Instruction Set Architecture (ISA), and all of the components were designed from Hardware Description Language (HDL). These components functionality was then verified by tools provided by Nand2Tetris.
+The Hack CPU is a 16-bit machine comprised of a single cycle data path. This machine uses Instruction Set Architecture (ISA), and all of the components were designed from Hardware Description Language (HDL). These components functionality was then verified by tools provided by Nand2Tetris.
 
 The Datapath (CPU) involves several components, all which were designed in HDL:
 - Arithmetic Logic Unit (ALU)
