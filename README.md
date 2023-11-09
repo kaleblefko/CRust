@@ -12,12 +12,14 @@ The Datapath (CPU) involves several components, all which were designed in HDL:
 - Memory/Registers
 - Counter (Program Counter)
 
-# 2) Assembler
-The Assembler takes in a .asm file and converts it into a .hack file. .hack files serve as machine language (or binary's) files that can be executed on the Hack Computer. The overall process of assembling follows four steps:
+# 2) Assembler and Virtual Machine
+The Assembler takes in a .asm file and converts it into a .hack file. These .hack files serve as machine language (or binary's) files that can be executed on the Hack Computer. The overall process of assembling follows four steps:
 1. Parse each command into its underlying fields
 2. For each field, generate corresponding bits in machine language
 3. Resolve symbols and replace them with numeric addresses of memory locations
 4. Assemble binary codes into complete machine instruction
+
+The Virtual Machine translates .vm files into .asm files that are then fed into the assembler. The Virtual Machine is a Stack Based Machine that utilizes Stack Arithmetic to emit the proper assembly code for certain operations found in the HLL code.
 
 # 3) Compiler
 Finally, a compiler was made for our own low level language which converts the low level language into assembly to be processed into Hack Assembly for the Assembler to use.
