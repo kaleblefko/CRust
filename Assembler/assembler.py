@@ -94,7 +94,6 @@ symbol_table = {'SP':0,
 
 def print_intermediate_representation(ir):
     """Print intermediate representation"""
-    
     for i in ir:
         print()
         for key, value in i.items():
@@ -103,7 +102,6 @@ def print_intermediate_representation(ir):
         
 def print_instruction_fields(s):
     """Print fields in instruction"""
-    
     print()
     for key, value in s.items():
         print(key, ':', value)
@@ -122,21 +120,6 @@ def valid_tokens(s):
     return True
 
 def parse(command):
-    """Implements finite automate to scan assembly statements and parse them.
-
-    WHITE SPACE: Space characters are ignored. Empty lines are ignored.
-    
-    COMMENT: Text beginning with two slashes (//) and ending at the end of the line is considered 
-    comment and is ignored.
-    
-    CONSTANTS: Must be non-negative and are written in decimal notation. 
-    
-    SYMBOL: A user-defined symbol can be any sequence of letters, digits, underscore (_), dot (.), 
-    dollar sign ($), and colon (:) that does not begin with a digit.
-    
-    LABEL: (SYMBOL)
-    """
-    
     # Data structure to hold the parsed fields for the command
     s = {}
     s['instruction_type'] = ''
@@ -156,7 +139,7 @@ def parse(command):
     A_type = False
     C_type = False
     token = ''
-    # FIXME: Implement your finite automata to extract tokens from command
+    #Finite automota that parses command
     for char in command:
         if state == -1:
             state = -1 
@@ -289,7 +272,7 @@ def parse(command):
                     state = 13
     if s['instruction_type'] == 'A_INSTRUCTION':
         s['value'] = token
-    # FIXME: check if the tokens were formed correctly
+    # Check if token is valid
     if not(valid_tokens(s)):
         return -1
     return s
@@ -345,7 +328,7 @@ def run_assembler(file_name):
     """
     ir = []
     address = 0
-    # FIXME: Implement Pass 1 of the assembler to generate the intermediate data structure
+    # Pass 1 of the assembler to generate the intermediate data structure
     with open(file_name, 'r') as f:
         for command in f:  
             s = parse(command)
@@ -356,7 +339,7 @@ def run_assembler(file_name):
                     symbol_table[s['value']] = address
                 ir.append(s)
 
-    # FIXME: Implement Pass 2 of assembler to generate the machine code from the intermediate data structure
+    # Pass 2 of assembler to generate the machine code from the intermediate data structure
     machine_code = []
     address = 16
     for s in ir:
