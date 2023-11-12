@@ -363,7 +363,7 @@ def run_assembler(file_name):
         if s['value_type'] == 'SYMBOL':
             if not(s['value'] in symbol_table):
                 symbol_table[s['value']] = address
-                ++address
+                address += 1
         if s['instruction_type'] != 'PSUEDO_INSTRUCTION':
             m = generate_machine_code(s)
             machine_code.append(str(m))
