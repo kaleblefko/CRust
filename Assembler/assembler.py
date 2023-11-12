@@ -114,7 +114,6 @@ def valid_tokens(s):
     
     return True
 
-
 def parse(command):
     """Implements finite automate to scan assembly statements and parse them.
 
@@ -146,11 +145,133 @@ def parse(command):
     valid_operands = '01DMA'
     valid_operations = '+-&|'
     
-    
+    state = 0
+    A_type = False
+    C_type = False
+    token = ''
     # FIXME: Implement your finite automata to extract tokens from command
     for char in command:
-        pass
-    
+        if state == -1:
+            state = -1 
+        elif not(A_type) and not(C_type):
+            if state == 0:
+                if char == ' ':
+                    state = 0
+                elif char == '\n':
+                    state = 0 
+                elif char == '@':
+                    A_type = True
+                    s['instruction_type'] = 'A_INSTRUCTION'
+                    state = 3
+                elif char in valid_operands:
+                    C_type = True
+                    token = char
+                    state = 9
+                elif char == '/':
+                    state = 1
+                else:
+                    state = -1 
+            elif state == 1:
+                if char == '/':
+                    state = 2
+                else:
+                    state = -1
+            elif state == 2:
+                state = 2 
+            else:
+                state = -1
+        elif A_type:
+            match (state):
+                case 3:
+                    if char == ' ':
+                        state = 3 
+                    elif char.isalpha():
+                        s['value_type'] = 'SYMBOL'
+                        token = char
+                        state = 4
+                    elif char.isdigit():
+                        s['value_type'] = 'NUMERIC'
+                        token = char
+                        state = 5
+                case 4:
+                    if char.isalpha() or char.isdigit() or (char in '_.$:'):
+                        state = 4
+                        token += char
+                    elif char == '\n':
+                        state = 8
+                    elif char == ' ':
+                        state = 6
+                case 5:
+                    if char.isdigit():
+                        token += char
+                        state = 5
+                    elif char == ' ':
+                        state = 7
+                    else:
+                        state = -1
+                case 6:
+                    if char == ' ':
+                        state = 6
+                    elif char == '/':
+                        state = 8
+                case 7:
+                    if char ==  ' ':
+                        state = 7
+                    elif char == '/':
+                        state = 8
+                    else:
+                        state = -1
+                case 8:
+                    state = 8
+        elif C_type:
+            match (state):
+                case 9:
+                    if char == '=':
+                        s['instruction_type'] = 'C_INSTRUCTION'
+                        s['dest'] = token
+                        s['jmp'] = 'null'
+                        state = 10
+                    elif char == ';':
+                        s['instruction_type'] = 'J_INSTRUCTION'
+                        s['comp'] = token
+                        s['dest'] = 'null'
+                        state = 11
+                    elif char == ' ':
+                        state = 9
+                    else:
+                        state = -1
+                case 10:
+                    if (char in valid_operands) or (char in valid_operations):
+                        s['comp'] += char
+                        state = 10
+                    elif char == ' ':
+                        state = 12
+                    else:
+                        state = -1
+                case 11:
+                    if char.isalpha():
+                        s['jmp'] += char
+                        state = 11
+                    elif char ==  ' ':
+                        state = 11
+                    elif char == '/':
+                        state = 13
+                case 12:
+                    if (char in valid_operands) or (char in valid_operations):
+                        s['comp'] += char
+                        state = 10
+                    elif char == ' ':
+                        state = 12
+                    elif char == '/':
+                        state = 13
+                    else:
+                        state = -1
+                case 13:
+                    state = 13
+    if (A_type):
+        s['value'] = token
+    if token != '':
+        print(s)
     # FIXME: check if the tokens were formed correctly
     
     return s    
@@ -191,7 +312,7 @@ def run_assembler(file_name):
     # FIXME: Implement Pass 1 of the assembler to generate the intermediate data structure
     with open(file_name, 'r') as f:
         for command in f:  
-            pass
+            parse(command)
     
     
     # FIXME: Implement Pass 2 of assembler to generate the machine code from the intermediate data structure
