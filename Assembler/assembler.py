@@ -111,7 +111,14 @@ def print_instruction_fields(s):
 
 def valid_tokens(s):
     """Return True if tokens belong to valid instruction-field patterns"""
-    
+    if s['instruction_type'] == '':
+        return False
+    if s['instruction_type'] == 'C_INSTRUCTION':
+        if not((s['dest'] in valid_dest_patterns) and (s['comp'] in valid_comp_patterns)):
+            return False
+    elif s['instruction_type'] == 'J_INSTRUCTION':
+        if not((s['comp'] in valid_comp_patterns) and (s['jmp'] in valid_jmp_patterns)):
+            return False
     return True
 
 def parse(command):
@@ -167,6 +174,10 @@ def parse(command):
                     C_type = True
                     token = char
                     state = 9
+                elif char == '(':
+                    s['instruction_type'] = 'PSUEDO_INSTRUCTION'
+                    s['value_type'] = 'SYMBOL'
+                    state = 3
                 elif char == '/':
                     state = 1
                 else:
@@ -178,6 +189,14 @@ def parse(command):
                     state = -1
             elif state == 2:
                 state = 2 
+            elif state == 3:
+                if char.isalpha() or char.isdigit() or (char in '_.$:'):
+                    s['value'] += char
+                    state = 3
+                elif char == '\n':
+                    state = 0
+                elif char == '/':
+                    state = 1
             else:
                 state = -1
         elif A_type:
@@ -268,20 +287,33 @@ def parse(command):
                         state = -1
                 case 13:
                     state = 13
-    if (A_type):
+    if s['instruction_type'] == 'A_INSTRUCTION':
         s['value'] = token
-    if token != '':
-        print(s)
     # FIXME: check if the tokens were formed correctly
-    
-    return s    
+    if not(valid_tokens(s)):
+        return -1
+    return s
    
-def generate_machine_code():
+def generate_machine_code(s):
     """Generate machine code from intermediate data structure"""
     
     machine_code = []
     
-    return machine_code
+    if s['instruction_type'] == 'A_INSTRUCTION':
+        machine_code += '0'
+        machine_code += format(symbol_table[s['value']], 'b').zfill(15)
+    elif s['instruction_type'] == 'C_INSTRUCTION':
+        machine_code += '111'
+        machine_code += valid_comp_patterns[s['comp']]
+        machine_code += valid_dest_patterns[s['dest']]
+        machine_code += valid_jmp_patterns[s['jmp']]
+    elif s['instruction_type'] == 'J_INSTRUCTION':
+        machine_code += '111'
+        machine_code += valid_comp_patterns[s['comp']]
+        machine_code += valid_dest_patterns[s['dest']]
+        machine_code += valid_jmp_patterns[s['jmp']]
+
+    return ''.join(machine_code)
     
 
 def print_machine_code(machine_code):
@@ -308,16 +340,30 @@ def run_assembler(file_name):
     
     The symbol table is also generated in this step.    
     """
-    
+    ir = []
+    address = 0
     # FIXME: Implement Pass 1 of the assembler to generate the intermediate data structure
     with open(file_name, 'r') as f:
         for command in f:  
-            parse(command)
-    
-    
+            s = parse(command)
+            if s != -1:
+                if (s['instruction_type'] == 'A_INSTRUCTION') or (s['instruction_type'] == 'C_INSTRUCTION') or (s['instruction_type'] == 'J_INSTRUCTION'):
+                    address += 1
+                else:
+                    symbol_table[s['value']] = address
+                ir.append(s)
+
     # FIXME: Implement Pass 2 of assembler to generate the machine code from the intermediate data structure
     machine_code = []
-    
+    address = 16
+    for s in ir:
+        if s['value_type'] == 'SYMBOL':
+            if not(s['value'] in symbol_table):
+                symbol_table[s['value']] = address
+                ++address
+        if s['instruction_type'] != 'PSUEDO_INSTRUCTION':
+            m = generate_machine_code(s)
+            machine_code.append(str(m))
     return machine_code
     
   
@@ -332,7 +378,7 @@ if __name__ == "__main__":
         output_file = file_name_minus_extension + '.hack'
         machine_code = run_assembler(sys.argv[1])
         if machine_code:
-            print('Machine code generated successfully');
+            print('Machine code generated successfully')
             print('Writing output to file:', output_file)
             f = open(output_file, 'w')
             for s in machine_code:
