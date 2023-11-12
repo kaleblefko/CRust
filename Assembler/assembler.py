@@ -301,7 +301,10 @@ def generate_machine_code(s):
     
     if s['instruction_type'] == 'A_INSTRUCTION':
         machine_code += '0'
-        machine_code += format(symbol_table[s['value']], 'b').zfill(15)
+        if s['value_type'] == 'SYMBOL':
+            machine_code += format(symbol_table[s['value']], 'b').zfill(15)
+        else:
+            machine_code += format(int(s['value']), 'b').zfill(15)
     elif s['instruction_type'] == 'C_INSTRUCTION':
         machine_code += '111'
         machine_code += valid_comp_patterns[s['comp']]
