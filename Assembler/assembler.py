@@ -183,93 +183,94 @@ def parse(command):
             else:
                 state = -1
         elif A_type:
-            match (state):
-                case 3:
-                    if char == ' ':
-                        state = 3 
-                    elif char.isalpha():
-                        s['value_type'] = 'SYMBOL'
-                        token = char
-                        state = 4
-                    elif char.isdigit():
-                        s['value_type'] = 'NUMERIC'
-                        token = char
-                        state = 5
-                case 4:
-                    if char.isalpha() or char.isdigit() or (char in '_.$:'):
-                        state = 4
-                        token += char
-                    elif char == '\n':
-                        state = 8
-                    elif char == ' ':
-                        state = 6
-                case 5:
-                    if char.isdigit():
-                        token += char
-                        state = 5
-                    elif char == ' ':
-                        state = 7
-                    else:
-                        state = -1
-                case 6:
-                    if char == ' ':
-                        state = 6
-                    elif char == '/':
-                        state = 8
-                case 7:
-                    if char ==  ' ':
-                        state = 7
-                    elif char == '/':
-                        state = 8
-                    else:
-                        state = -1
-                case 8:
+            if state == 3:
+                if char == ' ':
+                    state = 3 
+                elif char.isalpha():
+                    s['value_type'] = 'SYMBOL'
+                    token = char
+                    state = 4
+                elif char.isdigit():
+                    s['value_type'] = 'NUMERIC'
+                    token = char
+                    state = 5
+            elif state == 4:
+                if char.isalpha() or char.isdigit() or (char in '_.$:'):
+                    state = 4
+                    token += char
+                elif char == '\n':
                     state = 8
+                elif char == ' ':
+                    state = 6
+            elif state == 5:
+                if char.isdigit():
+                    token += char
+                    state = 5
+                elif char == ' ':
+                    state = 7
+                else:
+                    state = -1
+            elif state == 6:
+                if char == ' ':
+                    state = 6
+                elif char == '/':
+                    state = 8
+            elif state == 7:
+                if char ==  ' ':
+                    state = 7
+                elif char == '/':
+                    state = 8
+                else:
+                    state = -1
+            elif state == 8:
+                state = 8
         elif C_type:
-            match (state):
-                case 9:
-                    if char == '=':
-                        s['instruction_type'] = 'C_INSTRUCTION'
-                        s['dest'] = token
-                        s['jmp'] = 'null'
-                        state = 10
-                    elif char == ';':
-                        s['instruction_type'] = 'J_INSTRUCTION'
-                        s['comp'] = token
-                        s['dest'] = 'null'
-                        state = 11
-                    elif char == ' ':
-                        state = 9
-                    else:
-                        state = -1
-                case 10:
-                    if (char in valid_operands) or (char in valid_operations):
-                        s['comp'] += char
-                        state = 10
-                    elif char == ' ':
-                        state = 12
-                    else:
-                        state = -1
-                case 11:
-                    if char.isalpha():
-                        s['jmp'] += char
-                        state = 11
-                    elif char ==  ' ':
-                        state = 11
-                    elif char == '/':
-                        state = 13
-                case 12:
-                    if (char in valid_operands) or (char in valid_operations):
-                        s['comp'] += char
-                        state = 10
-                    elif char == ' ':
-                        state = 12
-                    elif char == '/':
-                        state = 13
-                    else:
-                        state = -1
-                case 13:
+            if state == 9:
+                if char == '=':
+                    s['instruction_type'] = 'C_INSTRUCTION'
+                    s['dest'] = token
+                    s['jmp'] = 'null'
+                    state = 10
+                elif char == ';':
+                    s['instruction_type'] = 'J_INSTRUCTION'
+                    s['comp'] = token
+                    s['dest'] = 'null'
+                    state = 11
+                elif char == ' ':
+                    state = 9
+                elif char in valid_operands:
+                    token += char
+                    state = 9
+                else:
+                    state = -1
+            elif state == 10:
+                if (char in valid_operands) or (char in valid_operations):
+                    s['comp'] += char
+                    state = 10
+                elif char == ' ':
+                    state = 12
+                else:
+                    state = -1
+            elif state == 11:
+                if char.isalpha():
+                    s['jmp'] += char
+                    state = 11
+                elif char ==  ' ':
+                    state = 11
+                elif char == '/':
                     state = 13
+            elif state == 12:
+                if (char in valid_operands) or (char in valid_operations):
+                    s['comp'] += char
+                    state = 10
+                elif char == ' ':
+                    state = 12
+                elif char == '/':
+                    state = 13
+                else:
+                    state = -1
+            elif state == 13:
+                state = 13
     if s['instruction_type'] == 'A_INSTRUCTION':
         s['value'] = token
     # Check if token is valid
