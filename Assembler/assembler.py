@@ -289,12 +289,7 @@ def generate_machine_code(s):
             machine_code += format(symbol_table[s['value']], 'b').zfill(15)
         else:
             machine_code += format(int(s['value']), 'b').zfill(15)
-    elif s['instruction_type'] == 'C_INSTRUCTION':
-        machine_code += '111'
-        machine_code += valid_comp_patterns[s['comp']]
-        machine_code += valid_dest_patterns[s['dest']]
-        machine_code += valid_jmp_patterns[s['jmp']]
-    elif s['instruction_type'] == 'J_INSTRUCTION':
+    else:
         machine_code += '111'
         machine_code += valid_comp_patterns[s['comp']]
         machine_code += valid_dest_patterns[s['dest']]
