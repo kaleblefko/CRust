@@ -109,8 +109,6 @@ def print_instruction_fields(s):
 
 def valid_tokens(s):
     """Return True if tokens belong to valid instruction-field patterns"""
-    if s['instruction_type'] == '':
-        return False
     if s['instruction_type'] == 'C_INSTRUCTION':
         if not((s['dest'] in valid_dest_patterns) and (s['comp'] in valid_comp_patterns)):
             return False
@@ -329,14 +327,15 @@ def run_assembler(file_name):
     with open(file_name, 'r') as f:
         for command in f:  
             s = parse(command)
-            if s['status'] == 0:
-                if (s['instruction_type'] == 'A_INSTRUCTION') or (s['instruction_type'] == 'C_INSTRUCTION') or (s['instruction_type'] == 'J_INSTRUCTION'):
-                    address += 1
-                else:
-                    symbol_table[s['value']] = address
-                ir.append(s)
-            elif s['status'] == -1 and s['instruction_type'] != '':
-                return False
+            if s['instruction_type'] != '':
+                if s['status'] == 0:
+                    if (s['instruction_type'] == 'A_INSTRUCTION') or (s['instruction_type'] == 'C_INSTRUCTION') or (s['instruction_type'] == 'J_INSTRUCTION'):
+                        address += 1
+                    else:
+                        symbol_table[s['value']] = address
+                    ir.append(s)
+                elif s['status'] == -1:
+                    return False
     # Pass 2 of assembler to generate the machine code from the intermediate data structure
     machine_code = []
     address = 16
