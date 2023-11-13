@@ -171,7 +171,7 @@ def parse(command):
                 else:
                     state = -1
             elif state == 2:
-                state = 2 
+                break
             elif state == 3:
                 if char.isalpha() or char.isdigit() or (char in '_.$:'):
                     s['value'] += char
@@ -223,7 +223,7 @@ def parse(command):
                 else:
                     state = -1
             elif state == 8:
-                state = 8
+                break
         elif C_type:
             if state == 9:
                 if char == '=':
@@ -270,7 +270,7 @@ def parse(command):
                 else:
                     state = -1
             elif state == 13:
-                state = 13
+                break
     if s['instruction_type'] == 'A_INSTRUCTION':
         s['value'] = token
     # Check if token is valid
