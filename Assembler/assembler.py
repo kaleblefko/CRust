@@ -142,7 +142,8 @@ def parse(command):
     #Finite automota that parses command
     for char in command:
         if state == -1:
-            state = -1 
+            s['status'] = -1
+            break
         elif not(A_type) and not(C_type):
             if state == 0:
                 if char == ' ':
@@ -164,7 +165,7 @@ def parse(command):
                 elif char == '/':
                     state = 1
                 else:
-                    state = -1 
+                    state = -1
             elif state == 1:
                 if char == '/':
                     state = 2
@@ -275,7 +276,7 @@ def parse(command):
         s['value'] = token
     # Check if token is valid
     if not(valid_tokens(s)):
-        return -1
+        s['status'] = -1
     return s
    
 def generate_machine_code(s):
@@ -328,13 +329,14 @@ def run_assembler(file_name):
     with open(file_name, 'r') as f:
         for command in f:  
             s = parse(command)
-            if s != -1:
+            if s['status'] == 0:
                 if (s['instruction_type'] == 'A_INSTRUCTION') or (s['instruction_type'] == 'C_INSTRUCTION') or (s['instruction_type'] == 'J_INSTRUCTION'):
                     address += 1
                 else:
                     symbol_table[s['value']] = address
                 ir.append(s)
-
+            elif s['status'] == -1 and s['instruction_type'] != '':
+                return False
     # Pass 2 of assembler to generate the machine code from the intermediate data structure
     machine_code = []
     address = 16
