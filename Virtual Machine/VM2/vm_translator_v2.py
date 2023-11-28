@@ -35,55 +35,230 @@ def generate_push_code(segment, index):
     addressing.
     """
     s = [] 
+
+    if segment == 'constant':
+        # FIXME: complete the implementation 
+        s.append(f'@{index}')
+        s.append('D=A')
+        s.append('@SP')
+        s.append('A=M')
+        s.append('M=D')
+        s.append('@SP')
+        s.append('M=M+1')
+        return s
     
+    # FIXME: complete implmentation for local, argument, this, that, temp, pointer, and static segments.
+    segs = {
+        'local':'LCL',
+        'argument':'ARG',
+        'static':'16',
+        'this':'THIS',
+        'that':'THAT',
+        'pointer':'3',
+        'temp':'5'
+    }
     
-    # FIXME
-    
+    base = segs[segment]
+    if segment == 'temp':
+        s.append(f'@{base}')
+        s.append('D=M')
+        s.append(f'@{int(base)+int(index)}')
+        s.append('A=D+A')
+        s.append('D=M')
+    elif segment == 'pointer':
+        s.append(f'@{int(base)+int(index)}')
+        s.append('D=M')
+    else:
+        s.append(f'@{base}')
+        s.append('D=M')
+        s.append(f'@{index}')
+        s.append('A=D+A')
+        s.append('D=M')
+    s.append('@SP')
+    s.append('A=M')
+    s.append('M=D')
+    s.append('@SP')
+    s.append('M=M+1')
     return s
     
+
 def generate_pop_code(segment, index):
     """Generate assembly code to pop value from the stack.
     The popped value is stored in the specified memory segment using (base + index) 
     addressing.
     """
     s = []
-      
-   
-   # FIXME
     
+    # FIXME: complete implmentation for local, argument, this, that, temp, pointer, and static segments.
+    segs = {
+        'local':'LCL',
+        'argument':'ARG',
+        'static':'16',
+        'this':'THIS',
+        'that':'THAT',
+        'pointer':'3',
+        'temp':'5'
+    }
+
+    base = segs[segment]
+    if segment == 'temp':
+        s.append(f'@{base}')
+        s.append('D=M')
+        s.append(f'@{int(base)+int(index)}')
+    elif segment == 'pointer':
+        s.append(f'@{base}')
+        s.append('D=A')
+        s.append(f'@{index}')
+    else:
+        s.append(f'@{base}')
+        s.append('D=M')
+        s.append(f'@{index}')
+    s.append('D=D+A')
+    s.append('@R13')
+    s.append('M=D')
+    s.append('@SP')
+    s.append('M=M-1')
+    s.append('A=M')
+    s.append('D=M')
+    s.append('@R13')
+    s.append('A=M')
+    s.append('M=D')
+
     return s
+
 
 def generate_arithmetic_or_logic_code(operation):
-    """Generate assembly code to perform specified ALU operation. 
-    The two operands are popped from the stack and result of operation 
-    pushed back in the stack.
+    """Generate assembly code to perform the specified ALU operation. 
+    The two operands are popped from the stack and the result of the operation 
+    placed back in the stack.
     """
     s = []
-
-    # FIXME           
     
+    ops = {
+        'add':'+',
+        'sub':'-',
+        'or':'|',
+        'and':'&'
+    }
+
+    # FIXME: complete implementation for + , - , | , and & operators
+    s.append('@SP')
+    s.append('M=M-1')
+    s.append('A=M')
+    s.append('D=M')
+    s.append('@SP')
+    s.append('M=M-1')
+    s.append('A=M')
+    s.append(f'D=M{ops[operation]}D')
+    s.append('@SP')
+    s.append('A=M')
+    s.append('M=D')
+    s.append('@SP')
+    s.append('M=M+1')
     return s
+
 
 def generate_unary_operation_code(operation):
-    """Generate assembly code to perform specified unary operation. 
-    The operand is popped from the stack and result of operation 
-    pushed back in the stack.
+    """Generate assembly code to perform the specified unary operation. 
+    The operand is popped from the stack and the result of the operation 
+    placed back in the stack.
     """
     s = []
-   
-    # FIXME
     
+    ops = {
+        'neg':'-',
+        'not':'!'
+    }
+
+     # FIXME: complete implementation for bit-wise not (!) and negation (-) operatiors
+    s.append('@SP')
+    s.append('M=M-1')
+    s.append('A=M')
+    s.append(f'M={ops[operation]}M')
+    s.append('@SP')
+    s.append('M=M+1')
     return s
+
 
 def generate_relation_code(operation, line_number):
     """Generate assembly code to perform the specified relational operation. 
-    The two operands are popped from the stack and result of the operation 
-    pushed back in the stack.
+    The two operands are popped from the stack and the result of the operation 
+    placed back in the stack.
     """
     s = []
+    label_1 = ''
+    label_2 = ''
     
-    # FIXME
-   
+    s.append('@SP')
+    s.append('M=M-1')           # Adjust stack pointer
+    s.append('A=M')
+    s.append('D=M')             # D  = operand2
+    s.append('@SP')
+    s.append('M=M-1')           # Adjust stack pointer to get to operand #1
+    s.append('A=M')
+        
+    if operation == 'lt':
+        s.append('D=M-D')       # D = operand1 - operand2
+        label_1 = 'IF_LT_' + str(line_number)
+        s.append('@' + label_1)
+        s.append('D;JLT')       # if operand1 < operand2 goto IF_LT_*
+        s.append('@SP')
+        s.append('A=M')
+        s.append('M=0')          # Push result on stack 
+        s.append('@SP')
+        s.append('M=M+1')
+        label_2 = 'END_IF_ELSE_' + str(line_number)
+        s.append('@' + label_2)
+        s.append('0;JMP')
+        s.append('(' + label_1 + ')')
+        s.append('@SP')
+        s.append('A=M')
+        s.append('M=-1')        # Push result on stack
+        s.append('@SP')
+        s.append('M=M+1')
+        s.append('(' + label_2 + ')')
+
+    # FIXME: complete implementation for eq and gt operations
+    elif operation == 'gt':
+        s.append('D=M-D')       # D = operand1 - operand2
+        label_1 = 'IF_GT_' + str(line_number)
+        s.append('@' + label_1)
+        s.append('D;JGT')       # if operand1 < operand2 goto IF_LT_*
+        s.append('@SP')
+        s.append('A=M')
+        s.append('M=0')          # Push result on stack 
+        s.append('@SP')
+        s.append('M=M+1')
+        label_2 = 'END_IF_ELSE_' + str(line_number)
+        s.append('@' + label_2)
+        s.append('0;JMP')
+        s.append('(' + label_1 + ')')
+        s.append('@SP')
+        s.append('A=M')
+        s.append('M=-1')        # Push result on stack
+        s.append('@SP')
+        s.append('M=M+1')
+        s.append('(' + label_2 + ')')
+    elif operation == 'eq':
+        s.append('D=M-D')       # D = operand1 - operand2
+        label_1 = 'IF_EQ_' + str(line_number)
+        s.append('@' + label_1)
+        s.append('D;JEQ')       # if operand1 < operand2 goto IF_LT_*
+        s.append('@SP')
+        s.append('A=M')
+        s.append('M=0')          # Push result on stack 
+        s.append('@SP')
+        s.append('M=M+1')
+        label_2 = 'END_IF_ELSE_' + str(line_number)
+        s.append('@' + label_2)
+        s.append('0;JMP')
+        s.append('(' + label_1 + ')')
+        s.append('@SP')
+        s.append('A=M')
+        s.append('M=-1')        # Push result on stack
+        s.append('@SP')
+        s.append('M=M+1')
+        s.append('(' + label_2 + ')')
     return s
   
 
