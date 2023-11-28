@@ -7,8 +7,8 @@ Author: Naga Kandasamy
 Date created: September 1, 2020
 Date modified: November 16, 2023
 
-Student name(s): 
-Date modified: 
+Student name(s): Kaleb Lefkowitz
+Date modified: November 28, 2023
 """
 import os
 import sys
