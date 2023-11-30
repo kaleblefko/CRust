@@ -35,7 +35,7 @@ def generate_push_code(segment, index):
     addressing.
     """
     s = [] 
-
+    s.append(f'// push {segment} {index}')
     if segment == 'constant':
         # FIXME: complete the implementation 
         s.append(f'@{index}')
@@ -51,13 +51,13 @@ def generate_push_code(segment, index):
     segs = {
         'local':'LCL',
         'argument':'ARG',
-        'static':'16',
         'this':'THIS',
         'that':'THAT',
+        'static': '16',
         'pointer':'3',
         'temp':'5'
     }
-    
+
     base = segs[segment]
     if segment == 'temp':
         s.append(f'@{base}')
@@ -79,6 +79,7 @@ def generate_push_code(segment, index):
     s.append('M=D')
     s.append('@SP')
     s.append('M=M+1')
+
     return s
     
 
@@ -99,7 +100,7 @@ def generate_pop_code(segment, index):
         'pointer':'3',
         'temp':'5'
     }
-
+    s.append(f'// pop {segment} {index}')
     base = segs[segment]
     if segment == 'temp':
         s.append(f'@{base}')
@@ -140,7 +141,7 @@ def generate_arithmetic_or_logic_code(operation):
         'or':'|',
         'and':'&'
     }
-
+    s.append(f'// Operation code for {operation}')
     # FIXME: complete implementation for + , - , | , and & operators
     s.append('@SP')
     s.append('M=M-1')
@@ -273,7 +274,13 @@ def generate_if_goto_code(label):
     s = []
     
     # FIXME: complete implementation
-    
+    s.append('@SP')
+    s.append('M=M-1')
+    s.append('A=M')
+    s.append('D=M')
+    s.append(f'@{label}')
+    s.append('D;JNE')
+
     return s
 
 def generate_goto_code(label):
@@ -281,6 +288,8 @@ def generate_goto_code(label):
     s = []
     
     # FIXME
+    s.append(f'@{label}')
+    s.append('0;JMP')
     
     return s
 
@@ -322,17 +331,40 @@ def generate_function_call_code(function, nargs, line_number):
     s = []
     
     # FIXME: Push return address to stack
-    
+    s.append(f'@{function.upper()}_RETURN_ADDRESS_{line_number}')
+    s.append('D=A')
+    s.append('@SP')
+    s.append('A=M')
+    s.append('M=D')
+    s.append('@SP')
+    s.append('M=M+1')
     # FIXME: Push LCL, ARG, THIS, and THAT registers to stack
-    
+    for i in ['LCL', 'ARG', 'THIS', 'THAT']:
+        s.append(f'@{i}')
+        s.append('D=M')
+        s.append('@SP')
+        s.append('A=M')
+        s.append('M=D')
+        s.append('@SP')
+        s.append('M=M+1')
     # FIXME: Set ARG register to point to start of arguments in the current frame
-    
+    s.append('@SP')
+    s.append('D=M')
+    s.append('@5')
+    s.append('D=D-A')
+    s.append(f'@{nargs}')
+    s.append('D=D-A')
+    s.append('@ARG')
+    s.append('M=D')
     # FIXME: Set LCL register to current SP
-    
+    s.append('@SP')
+    s.append('D=M')
+    s.append('@LCL')
+    s.append('M=D')
     # FIXME: Generate goto code to jump to function 
-    
+    s += generate_goto_code(function)
     # FIXME: Generate the pseudo-instruction/label corresponding to the return address
-    
+    s += generate_pseudo_instruction_code(f'{function.upper()}_RETURN_ADDRESS_{line_number}')
     return s
 
 def generate_function_body_code(f, nvars):
@@ -341,11 +373,13 @@ def generate_function_body_code(f, nvars):
     n: number of local variables declared within the function.
     """
     s = []
-    
+
     # FIXME: Generate the pseudo instruction -- the label
-    
+    s.append('// Function body')
+    s += generate_pseudo_instruction_code(f)
     # FIXME: Push nvars local variables into the stack, each intialized to zero
-    
+    for i in range(0, nvars):
+        s += generate_push_code('local', i)
     return s
 
 
@@ -355,29 +389,68 @@ def generate_function_return_code():
     
     s.append('// Copy LCL to temp register R14 (FRAME)')
     # FIXME: Copy LCL to temp register R14 (FRAME)
-    
+    s.append('@LCL')
+    s.append('D=M')
+    s.append('@R14')
+    s.append('M=D')
     s.append('// Store return address in temp register R15 (RET)')
     # FIXME: Store return address in temp register R15 (RET)
-    
+    s.append('@R14')
+    s.append('D=M')
+    s.append('@5')
+    s.append('D=D-A')
+    s.append('A=D')
+    s.append('D=M')
+    s.append('@R15')
+    s.append('M=D')
     s.append('// Pop result from the working stack and move it to beginning of ARG segment')
     # FIXME: Pop result from the working stack and move it to beginning of ARG segment
+    s += generate_pop_code('argument', 0)
     # FIXME: Adjust SP = ARG + 1
-    
-    
+    s.append('@ARG')
+    s.append('D=M+1')
+    s.append('@SP')
+    s.append('M=D')
     # FIXME: Restore THAT = *(FRAME - 1)
-    
-    
+    s.append('@R14')
+    s.append('D=M')
+    s.append('@1')
+    s.append('D=D-A')
+    s.append('A=D')
+    s.append('D=M')
+    s.append('@THAT')
+    s.append('M=D')
     # FIXME: Restore THIS = *(FRAME - 2)
-   
-    
+    s.append('@R14')
+    s.append('D=M')
+    s.append('@2')
+    s.append('D=D-A')
+    s.append('A=D')
+    s.append('D=M')
+    s.append('@THIS')
+    s.append('M=D')
     # FIXME: Restore ARG = *(FRAME - 3)
-    
-    
+    s.append('@R14')
+    s.append('D=M')
+    s.append('@3')
+    s.append('D=D-A')
+    s.append('A=D')
+    s.append('D=M')
+    s.append('@ARG')
+    s.append('M=D')
     # FIXME: Restore LCL = *(FRAME - 4)
-    
-    
+    s.append('@R14')
+    s.append('D=M')
+    s.append('@4')
+    s.append('D=D-A')
+    s.append('A=D')
+    s.append('D=M')
+    s.append('@LCL')
+    s.append('M=D')
     # FIXME: Jump to return address stored in R15 back to the caller code
-   
+    s.append('@R15')
+    s.append('A=M')
+    s.append('0;JMP // goto RET')
     return s
 
 def translate_vm_commands(tokens, line_number):
