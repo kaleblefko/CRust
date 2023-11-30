@@ -19,7 +19,11 @@ The Assembler takes in a .asm file and converts it into a .hack file. These .hac
 3. Resolve symbols and replace them with numeric addresses of memory locations
 4. Assemble binary codes into complete machine instruction
 
-The Virtual Machine translates .vm files into .asm files that are then fed into the assembler. The Virtual Machine is a Stack Based Machine that utilizes Stack Arithmetic to emit the proper assembly code for certain operations found in the HLL code.
+The Virtual Machine translates .vm files into .asm files that are then fed into the assembler. The Virtual Machine is a Stack Based Machine that utilizes Stack Arithmetic to emit the proper assembly code for certain operations found in the HLL code. The Virtual Mcahine Utilizes 4 Memory Segments:
+1. Static Variables
+2. Constants
+3. Support Function Calls (argument and local variables)
+4. Support operations on the heap (this and that)
 
 # 3) Compiler
 Finally, a compiler was made for our own low level language which converts the low level language into assembly to be processed into Hack Assembly for the Assembler to use.
