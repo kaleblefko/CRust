@@ -1,4 +1,4 @@
-## To execute assembler.py:
+## To execute vm_translator.py:
 
 Have vm_translator.py and your vm file in the same folder/directory
 
