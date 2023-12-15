@@ -26,8 +26,10 @@ The Virtual Machine translates .vm files into .asm files that are then fed into 
 4. Support operations on the heap (this and that)
 
 # 3) Compiler
-Finally, a compiler was made for our own low level language which converts the low level language into assembly to be processed into Hack Assembly for the Assembler to use.
+The Compiler used two main components to take .txt files in the CRust syntax to compile and turn the raw text into a .vm file for it to then be procesesed through the previous above steps.
+1. Scanner (or a lexical analyzer) to read a line of code and convert it into a list of tokens
+2. Parser to fit the tokens into a grammatical model called a parse tree
+   a. That parse tree is then turned into an Abstract Syntax Tree (AST)
+3. The AST is then broken down into it's corresponding VM commands and the commands are written to the output .vm file
 
 For the sake of my project, the name of my low level language is CRust, and this repository follows the progress and components that went into creating CRust.
-
-For now some sections of this README will remain empty, however, this repository is living and will be updated as progress is made.
