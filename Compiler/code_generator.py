@@ -447,7 +447,6 @@ class CodeGenerator(NodeVisitor):
 
         variable_name = node.left.value
         expr = self.visit(node.right)
-        print(f'{variable_name} = {expr}')
         for i in str(expr).split(" "):
             if i.isnumeric():
                 vm_code.append(f"push constant {i}\n")
@@ -507,7 +506,6 @@ if __name__ == "__main__":
             f = open(output_file, 'w')
             f.write(f"function {output_file.split('.')[0]} {len(code_generator.symbol_table)}\n")
             for i in vm_code:
-                print(i)
                 f.write(i)
             f.write("return\n")
         else:
