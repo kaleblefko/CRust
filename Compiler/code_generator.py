@@ -7,8 +7,8 @@ Author: Naga Kandasamy
 Date created: November 12, 2020
 Date modified: December 6, 2023
 
-Student name(s): 
-Date created: 
+Student name(s): Kaleb Lefkowitz
+Date created: December 6th, 2023
 
 Notes: Adapted from "Let’s Build A Simple Interpreter" by Ruslan Spivak
 https://ruslanspivak.com/lsbasi-part1/
@@ -424,13 +424,8 @@ class CodeGenerator(NodeVisitor):
     def visit_Var(self, node):
         variable_name = node.value
         return variable_name
-
+    global symbol_table
     def visit_Assign(self, node):
-        variable_name = node.left.value
-        expr = self.visit(node.right)
-        print(variable_name, '=', expr)
-        
-    def visit_CompoundStatement(self, node):
         """FIXME: generate VM commands here.
         
         1. Obatain the postfix from of the expression on the RHS. 
@@ -446,8 +441,30 @@ class CodeGenerator(NodeVisitor):
                 along with the corresponding address in the local segment. Generate VM command to pop the result off the working stack 
                 and save it to the address just added to the symbol table.
         """
-        pass
+        vm_code = []
+        ops = {'+':'add', '-':'sub', '*':'mul', '/':'div'}
+        symbol_table = {}
+        variable_name = node.left.value
+        expr = self.visit(node.right)
+        for i in str(expr).split(" "):
+            if i.isnumeric():
+                vm_code.append(f"push constant {i}\n")
+            elif i.isalpha():
+                vm_code.append(f"push local {symbol_table[i]}\n")
+            elif i in ops:
+                vm_code.append(f"call {ops[i]} 2\n")
+
+        if not(variable_name in symbol_table.keys()):
+            symbol_table[variable_name] = len(symbol_table)
+        return vm_code
+
         
+    def visit_CompoundStatement(self, node):
+        vm_code = []
+        for child in node.children:
+            vm_code.extend(self.visit(child))
+        return vm_code
+            
     def visit_noOp(self, node):
         pass
     
@@ -478,6 +495,11 @@ if __name__ == "__main__":
         code_generator = CodeGenerator(AST) 
         vm_code = code_generator.generate()
         # FIXME: Write VM commands to output file
-
+        if vm_code:
+            f = open(output_file, 'w')
+            for i in vm_code:
+                f.write(i)
+        else:
+            print('Error generating vm commands.')
 
 
