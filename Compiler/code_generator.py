@@ -450,10 +450,8 @@ class CodeGenerator(NodeVisitor):
         for i in str(expr).split(" "):
             if i.isnumeric():
                 vm_code.append(f"push constant {i}\n")
-            elif i in ['+', '-']:
+            elif i in ops.keys():
                 vm_code.append(f"{ops[i]}\n")
-            elif i == '*':
-                vm_code.append(f"call {ops[i]} 2\n")
             else:
                 vm_code.append(f"push local {self.symbol_table[i]}\n")
 
@@ -507,7 +505,7 @@ if __name__ == "__main__":
             f.write(f"function {output_file.split('.')[0]} {len(code_generator.symbol_table)}\n")
             for i in vm_code:
                 f.write(i)
-            f.write("return\n")
+            f.write("return")
         else:
             print('Error generating vm commands.')
 

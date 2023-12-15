@@ -6,7 +6,7 @@ pop local 1
 push local 0
 push local 0
 push local 1
-call mult 2
+mult
 add
 pop local 2
 push local 0

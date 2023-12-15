@@ -13,6 +13,6 @@ sub
 pop local 3
 push local 0
 push local 1
-call mult 2
+mult
 pop local 4
 return
