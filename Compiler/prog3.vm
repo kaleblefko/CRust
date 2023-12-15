@@ -1,16 +1,18 @@
-function prog2 4
+function prog3 5
 push constant 5
 pop local 0
 push constant 10
 pop local 1
 push local 0
+push local 1
+add
+pop local 2
+push local 1
+push local 2
+sub
+pop local 3
 push local 0
 push local 1
 call mult 2
-add
-pop local 2
-push local 0
-push local 2
-add
-pop local 3
+pop local 4
 return

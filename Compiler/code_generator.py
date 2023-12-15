@@ -409,6 +409,7 @@ class CodeGenerator(NodeVisitor):
     """Class for code generator"""
     def __init__(self, AST):
         self.tree = AST
+        self.symbol_table = {}
         
     def visit_BinaryOperator(self, node):
         """Obtain post-fix form of the expression.
@@ -424,7 +425,7 @@ class CodeGenerator(NodeVisitor):
     def visit_Var(self, node):
         variable_name = node.value
         return variable_name
-    global symbol_table
+
     def visit_Assign(self, node):
         """FIXME: generate VM commands here.
         
@@ -442,27 +443,34 @@ class CodeGenerator(NodeVisitor):
                 and save it to the address just added to the symbol table.
         """
         vm_code = []
-        ops = {'+':'add', '-':'sub', '*':'mul', '/':'div'}
-        symbol_table = {}
+        ops = {'+':'add','-':'sub','*':'mult'}
+
         variable_name = node.left.value
         expr = self.visit(node.right)
+        print(f'{variable_name} = {expr}')
         for i in str(expr).split(" "):
             if i.isnumeric():
                 vm_code.append(f"push constant {i}\n")
-            elif i.isalpha():
-                vm_code.append(f"push local {symbol_table[i]}\n")
-            elif i in ops:
+            elif i in ['+', '-']:
+                vm_code.append(f"{ops[i]}\n")
+            elif i == '*':
                 vm_code.append(f"call {ops[i]} 2\n")
+            else:
+                vm_code.append(f"push local {self.symbol_table[i]}\n")
 
-        if not(variable_name in symbol_table.keys()):
-            symbol_table[variable_name] = len(symbol_table)
+        if variable_name in self.symbol_table.keys():
+            vm_code.append(f"pop local {self.symbol_table[variable_name]}\n")
+        else:
+            self.symbol_table[variable_name] = len(self.symbol_table)
+            vm_code.append(f"pop local {self.symbol_table[variable_name]}\n")
+
         return vm_code
 
         
     def visit_CompoundStatement(self, node):
         vm_code = []
         for child in node.children:
-            vm_code.extend(self.visit(child))
+            vm_code.extend(self.visit(child)) 
         return vm_code
             
     def visit_noOp(self, node):
@@ -497,8 +505,11 @@ if __name__ == "__main__":
         # FIXME: Write VM commands to output file
         if vm_code:
             f = open(output_file, 'w')
+            f.write(f"function {output_file.split('.')[0]} {len(code_generator.symbol_table)}\n")
             for i in vm_code:
+                print(i)
                 f.write(i)
+            f.write("return\n")
         else:
             print('Error generating vm commands.')
 

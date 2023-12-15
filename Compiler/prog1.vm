@@ -1,7 +1,18 @@
+function prog1 5
 push constant 1
+pop local 0
 push constant 2
+pop local 1
 push constant 3
+pop local 2
 push constant 4
-call add 2
-call add 2
-call add 2
+pop local 3
+push local 0
+push local 1
+add
+push local 2
+add
+push local 3
+add
+pop local 4
+return
